@@ -1,0 +1,5 @@
+kivy
+pytube
+ffmpeg-python
+plyer
+cython 
