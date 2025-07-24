@@ -1,0 +1,1536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JobPortal Pro - Modern Job Search Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .status-applied { @apply bg-blue-100 text-blue-800; }
+        .status-shortlisted { @apply bg-yellow-100 text-yellow-800; }
+        .status-rejected { @apply bg-red-100 text-red-800; }
+        .status-pending { @apply bg-gray-100 text-gray-800; }
+        .status-approved { @apply bg-green-100 text-green-800; }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg border-b">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 flex items-center">
+                        <i data-lucide="briefcase" class="h-8 w-8 text-indigo-600 mr-2"></i>
+                        <span class="text-xl font-bold text-gray-900">JobPortal Pro</span>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div id="userInfo" class="hidden items-center space-x-3">
+                        <span id="userName" class="text-gray-700"></span>
+                        <span id="userRole" class="px-2 py-1 text-xs font-medium rounded-full"></span>
+                        <button id="logoutBtn" class="text-gray-500 hover:text-gray-700">
+                            <i data-lucide="log-out" class="h-5 w-5"></i>
+                        </button>
+                    </div>
+                    <div id="authButtons" class="flex space-x-2">
+                        <button id="loginBtn" class="px-4 py-2 text-indigo-600 hover:text-indigo-800">Login</button>
+                        <button id="registerBtn" class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">Register</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        <!-- Landing Page -->
+        <div id="landingPage" class="animate-fade-in">
+            <div class="gradient-bg rounded-2xl p-12 text-center text-white mb-12">
+                <h1 class="text-5xl font-bold mb-4">Find Your Dream Job</h1>
+                <p class="text-xl mb-8 opacity-90">Connect with top employers and discover opportunities that match your skills</p>
+                <div class="flex justify-center space-x-4">
+                    <button id="getStartedBtn" class="px-8 py-3 bg-white text-indigo-600 rounded-lg font-semibold hover:bg-gray-100 transition-colors">
+                        Get Started
+                    </button>
+                    <button id="browseJobsBtn" class="px-8 py-3 border-2 border-white text-white rounded-lg font-semibold hover:bg-white hover:text-indigo-600 transition-colors">
+                        Browse Jobs
+                    </button>
+                </div>
+            </div>
+
+            <!-- Featured Jobs Preview -->
+            <div class="mb-12">
+                <h2 class="text-3xl font-bold text-gray-900 mb-8 text-center">Featured Opportunities</h2>
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6" id="featuredJobs">
+                    <!-- Featured jobs will be populated here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Auth Modal -->
+        <div id="authModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div class="bg-white rounded-lg p-8 max-w-md w-full mx-4">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 id="authTitle" class="text-2xl font-bold text-gray-900">Login</h2>
+                    <button id="closeAuthModal" class="text-gray-400 hover:text-gray-600">
+                        <i data-lucide="x" class="h-6 w-6"></i>
+                    </button>
+                </div>
+                <form id="authForm">
+                    <div id="nameField" class="mb-4 hidden">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
+                        <input type="text" id="fullName" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                        <input type="email" id="email" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                        <input type="password" id="password" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    <div id="roleField" class="mb-6 hidden">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Role</label>
+                        <select id="role" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            <option value="candidate">Candidate</option>
+                            <option value="recruiter">Recruiter</option>
+                        </select>
+                    </div>
+                    <button type="submit" id="authSubmit" class="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 transition-colors">
+                        Login
+                    </button>
+                </form>
+                <div class="mt-4 text-center">
+                    <button id="toggleAuth" class="text-indigo-600 hover:text-indigo-800">
+                        Don't have an account? Register
+                    </button>
+                </div>
+                <div class="mt-4 pt-4 border-t border-gray-200">
+                    <p class="text-sm text-gray-600 mb-3 text-center">Demo Accounts:</p>
+                    <div class="flex flex-col space-y-2">
+                        <button id="demoAdmin" class="w-full px-3 py-2 bg-red-50 text-red-700 rounded-md hover:bg-red-100 text-sm border border-red-200">
+                            🔑 Login as Admin (admin@example.com)
+                        </button>
+                        <button id="demoRecruiter" class="w-full px-3 py-2 bg-blue-50 text-blue-700 rounded-md hover:bg-blue-100 text-sm border border-blue-200">
+                            💼 Login as Recruiter (jane@example.com)
+                        </button>
+                        <button id="demoCandidate" class="w-full px-3 py-2 bg-green-50 text-green-700 rounded-md hover:bg-green-100 text-sm border border-green-200">
+                            👤 Login as Candidate (john@example.com)
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard Content -->
+        <div id="dashboardContent" class="hidden animate-fade-in">
+            <!-- Candidate Dashboard -->
+            <div id="candidateDashboard" class="hidden">
+                <div class="mb-8">
+                    <h1 class="text-3xl font-bold text-gray-900 mb-2">Candidate Dashboard</h1>
+                    <p class="text-gray-600">Discover and apply to your dream jobs</p>
+                </div>
+
+                <!-- Search and Filters -->
+                <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+                    <div class="grid md:grid-cols-4 gap-4">
+                        <div>
+                            <input type="text" id="jobSearch" placeholder="Search jobs..." class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                        <div>
+                            <select id="locationFilter" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                <option value="">All Locations</option>
+                                <option value="remote">Remote</option>
+                                <option value="new-york">New York</option>
+                                <option value="san-francisco">San Francisco</option>
+                                <option value="london">London</option>
+                            </select>
+                        </div>
+                        <div>
+                            <select id="categoryFilter" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                <option value="">All Categories</option>
+                                <option value="technology">Technology</option>
+                                <option value="marketing">Marketing</option>
+                                <option value="design">Design</option>
+                                <option value="finance">Finance</option>
+                            </select>
+                        </div>
+                        <div>
+                            <button id="searchJobs" class="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 transition-colors">
+                                Search
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tabs -->
+                <div class="mb-6">
+                    <div class="border-b border-gray-200">
+                        <nav class="-mb-px flex space-x-8">
+                            <button class="candidate-tab active py-2 px-1 border-b-2 border-indigo-500 font-medium text-sm text-indigo-600" data-tab="available-jobs">
+                                Available Jobs
+                            </button>
+                            <button class="candidate-tab py-2 px-1 border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700" data-tab="my-applications">
+                                My Applications
+                            </button>
+                            <button class="candidate-tab py-2 px-1 border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700" data-tab="saved-jobs">
+                                Saved Jobs
+                            </button>
+                        </nav>
+                    </div>
+                </div>
+
+                <!-- Tab Content -->
+                <div id="available-jobs" class="candidate-tab-content">
+                    <div id="jobListings" class="grid gap-6">
+                        <!-- Job listings will be populated here -->
+                    </div>
+                </div>
+
+                <div id="my-applications" class="candidate-tab-content hidden">
+                    <div id="applicationsList" class="space-y-4">
+                        <!-- Applications will be populated here -->
+                    </div>
+                </div>
+
+                <div id="saved-jobs" class="candidate-tab-content hidden">
+                    <div id="savedJobsList" class="grid gap-6">
+                        <!-- Saved jobs will be populated here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recruiter Dashboard -->
+            <div id="recruiterDashboard" class="hidden">
+                <div class="mb-8">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h1 class="text-3xl font-bold text-gray-900 mb-2">Recruiter Dashboard</h1>
+                            <p class="text-gray-600">Manage your job postings and applications</p>
+                        </div>
+                        <button id="postJobBtn" class="bg-indigo-600 text-white px-6 py-2 rounded-md hover:bg-indigo-700 transition-colors">
+                            <i data-lucide="plus" class="h-4 w-4 inline mr-2"></i>
+                            Post New Job
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Stats Cards -->
+                <div class="grid md:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <div class="flex items-center">
+                            <div class="p-2 bg-blue-100 rounded-lg">
+                                <i data-lucide="briefcase" class="h-6 w-6 text-blue-600"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium text-gray-600">Active Jobs</p>
+                                <p id="activeJobsCount" class="text-2xl font-bold text-gray-900">0</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <div class="flex items-center">
+                            <div class="p-2 bg-green-100 rounded-lg">
+                                <i data-lucide="users" class="h-6 w-6 text-green-600"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium text-gray-600">Total Applications</p>
+                                <p id="totalApplicationsCount" class="text-2xl font-bold text-gray-900">0</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <div class="flex items-center">
+                            <div class="p-2 bg-yellow-100 rounded-lg">
+                                <i data-lucide="clock" class="h-6 w-6 text-yellow-600"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium text-gray-600">Pending Review</p>
+                                <p id="pendingReviewCount" class="text-2xl font-bold text-gray-900">0</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <div class="flex items-center">
+                            <div class="p-2 bg-purple-100 rounded-lg">
+                                <i data-lucide="star" class="h-6 w-6 text-purple-600"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium text-gray-600">Shortlisted</p>
+                                <p id="shortlistedCount" class="text-2xl font-bold text-gray-900">0</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tabs -->
+                <div class="mb-6">
+                    <div class="border-b border-gray-200">
+                        <nav class="-mb-px flex space-x-8">
+                            <button class="recruiter-tab active py-2 px-1 border-b-2 border-indigo-500 font-medium text-sm text-indigo-600" data-tab="my-jobs">
+                                My Job Posts
+                            </button>
+                            <button class="recruiter-tab py-2 px-1 border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700" data-tab="applications">
+                                Applications
+                            </button>
+                        </nav>
+                    </div>
+                </div>
+
+                <!-- Tab Content -->
+                <div id="my-jobs" class="recruiter-tab-content">
+                    <div id="recruiterJobsList" class="space-y-4">
+                        <!-- Recruiter's jobs will be populated here -->
+                    </div>
+                </div>
+
+                <div id="applications" class="recruiter-tab-content hidden">
+                    <div id="recruiterApplicationsList" class="space-y-4">
+                        <!-- Applications will be populated here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Admin Dashboard -->
+            <div id="adminDashboard" class="hidden">
+                <div class="mb-8">
+                    <h1 class="text-3xl font-bold text-gray-900 mb-2">Admin Dashboard</h1>
+                    <p class="text-gray-600">Manage users, jobs, and platform settings</p>
+                </div>
+
+                <!-- Admin Stats -->
+                <div class="grid md:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <div class="flex items-center">
+                            <div class="p-2 bg-blue-100 rounded-lg">
+                                <i data-lucide="users" class="h-6 w-6 text-blue-600"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium text-gray-600">Total Users</p>
+                                <p id="totalUsersCount" class="text-2xl font-bold text-gray-900">0</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <div class="flex items-center">
+                            <div class="p-2 bg-green-100 rounded-lg">
+                                <i data-lucide="briefcase" class="h-6 w-6 text-green-600"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium text-gray-600">Total Jobs</p>
+                                <p id="adminTotalJobsCount" class="text-2xl font-bold text-gray-900">0</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <div class="flex items-center">
+                            <div class="p-2 bg-yellow-100 rounded-lg">
+                                <i data-lucide="clock" class="h-6 w-6 text-yellow-600"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium text-gray-600">Pending Approval</p>
+                                <p id="pendingApprovalCount" class="text-2xl font-bold text-gray-900">0</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <div class="flex items-center">
+                            <div class="p-2 bg-purple-100 rounded-lg">
+                                <i data-lucide="file-text" class="h-6 w-6 text-purple-600"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium text-gray-600">Applications</p>
+                                <p id="adminTotalApplicationsCount" class="text-2xl font-bold text-gray-900">0</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Admin Tabs -->
+                <div class="mb-6">
+                    <div class="border-b border-gray-200">
+                        <nav class="-mb-px flex space-x-8">
+                            <button class="admin-tab active py-2 px-1 border-b-2 border-indigo-500 font-medium text-sm text-indigo-600" data-tab="manage-users">
+                                Manage Users
+                            </button>
+                            <button class="admin-tab py-2 px-1 border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700" data-tab="approve-jobs">
+                                Approve Jobs
+                            </button>
+                            <button class="admin-tab py-2 px-1 border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700" data-tab="platform-stats">
+                                Platform Stats
+                            </button>
+                        </nav>
+                    </div>
+                </div>
+
+                <!-- Admin Tab Content -->
+                <div id="manage-users" class="admin-tab-content">
+                    <div class="bg-white rounded-lg shadow-md">
+                        <div class="px-6 py-4 border-b border-gray-200">
+                            <h3 class="text-lg font-medium text-gray-900">User Management</h3>
+                        </div>
+                        <div id="usersList" class="divide-y divide-gray-200">
+                            <!-- Users will be populated here -->
+                        </div>
+                    </div>
+                </div>
+
+                <div id="approve-jobs" class="admin-tab-content hidden">
+                    <div class="bg-white rounded-lg shadow-md">
+                        <div class="px-6 py-4 border-b border-gray-200">
+                            <h3 class="text-lg font-medium text-gray-900">Job Approval Queue</h3>
+                        </div>
+                        <div id="pendingJobsList" class="divide-y divide-gray-200">
+                            <!-- Pending jobs will be populated here -->
+                        </div>
+                    </div>
+                </div>
+
+                <div id="platform-stats" class="admin-tab-content hidden">
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="bg-white rounded-lg shadow-md p-6">
+                            <h3 class="text-lg font-medium text-gray-900 mb-4">User Distribution</h3>
+                            <div class="space-y-3">
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">Candidates</span>
+                                    <span id="candidatesCount" class="font-medium">0</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">Recruiters</span>
+                                    <span id="recruitersCount" class="font-medium">0</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">Admins</span>
+                                    <span id="adminsCount" class="font-medium">0</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-white rounded-lg shadow-md p-6">
+                            <h3 class="text-lg font-medium text-gray-900 mb-4">Job Statistics</h3>
+                            <div class="space-y-3">
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">Active Jobs</span>
+                                    <span id="statsActiveJobs" class="font-medium">0</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">Pending Approval</span>
+                                    <span id="statsPendingJobs" class="font-medium">0</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">Total Applications</span>
+                                    <span id="statsApplications" class="font-medium">0</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Job Post Modal -->
+    <div id="jobPostModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-8 max-w-2xl w-full mx-4 max-h-screen overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-900">Post New Job</h2>
+                <button id="closeJobModal" class="text-gray-400 hover:text-gray-600">
+                    <i data-lucide="x" class="h-6 w-6"></i>
+                </button>
+            </div>
+            <form id="jobPostForm">
+                <div class="grid md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Job Title</label>
+                        <input type="text" id="jobTitle" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Company</label>
+                        <input type="text" id="jobCompany" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                </div>
+                <div class="grid md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Location</label>
+                        <input type="text" id="jobLocation" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Category</label>
+                        <select id="jobCategory" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            <option value="">Select Category</option>
+                            <option value="technology">Technology</option>
+                            <option value="marketing">Marketing</option>
+                            <option value="design">Design</option>
+                            <option value="finance">Finance</option>
+                            <option value="sales">Sales</option>
+                            <option value="hr">Human Resources</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="grid md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Job Type</label>
+                        <select id="jobType" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            <option value="full-time">Full Time</option>
+                            <option value="part-time">Part Time</option>
+                            <option value="contract">Contract</option>
+                            <option value="internship">Internship</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Salary Range</label>
+                        <input type="text" id="jobSalary" placeholder="e.g., $50,000 - $70,000" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Job Description</label>
+                    <textarea id="jobDescription" rows="6" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Describe the role, responsibilities, and requirements..."></textarea>
+                </div>
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Required Skills (comma-separated)</label>
+                    <input type="text" id="jobSkills" placeholder="JavaScript, React, Node.js" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                </div>
+                <div class="flex justify-end space-x-4">
+                    <button type="button" id="cancelJobPost" class="px-6 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50">
+                        Cancel
+                    </button>
+                    <button type="submit" class="px-6 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">
+                        Post Job
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Job Application Modal -->
+    <div id="jobApplicationModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-8 max-w-md w-full mx-4">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-900">Apply for Job</h2>
+                <button id="closeApplicationModal" class="text-gray-400 hover:text-gray-600">
+                    <i data-lucide="x" class="h-6 w-6"></i>
+                </button>
+            </div>
+            <form id="jobApplicationForm">
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Cover Letter</label>
+                    <textarea id="coverLetter" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Tell us why you're perfect for this role..."></textarea>
+                </div>
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Resume Upload (Demo)</label>
+                    <input type="file" id="resumeUpload" accept=".pdf,.doc,.docx" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <p class="text-xs text-gray-500 mt-1">This is a demo - files won't actually be uploaded</p>
+                </div>
+                <div class="flex justify-end space-x-4">
+                    <button type="button" id="cancelApplication" class="px-6 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50">
+                        Cancel
+                    </button>
+                    <button type="submit" class="px-6 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">
+                        Submit Application
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // Mock data storage (simulating Firebase)
+        let mockData = {
+            users: [
+                { id: '1', name: 'John Doe', email: 'john@example.com', role: 'candidate' },
+                { id: '2', name: 'Jane Smith', email: 'jane@example.com', role: 'recruiter' },
+                { id: '3', name: 'Admin User', email: 'admin@example.com', role: 'admin' }
+            ],
+            jobs: [
+                {
+                    id: '1',
+                    title: 'Senior Frontend Developer',
+                    company: 'TechCorp',
+                    location: 'San Francisco',
+                    category: 'technology',
+                    type: 'full-time',
+                    salary: '$80,000 - $120,000',
+                    description: 'We are looking for a skilled Frontend Developer to join our team. You will be responsible for building user interfaces using React and modern web technologies.',
+                    skills: ['React', 'JavaScript', 'CSS', 'HTML'],
+                    recruiterId: '2',
+                    status: 'approved',
+                    approved: true,
+                    createdAt: new Date('2024-01-15')
+                },
+                {
+                    id: '2',
+                    title: 'UX Designer',
+                    company: 'DesignStudio',
+                    location: 'Remote',
+                    category: 'design',
+                    type: 'full-time',
+                    salary: '$60,000 - $90,000',
+                    description: 'Join our creative team as a UX Designer. You will work on user research, wireframing, and creating intuitive user experiences.',
+                    skills: ['Figma', 'User Research', 'Prototyping', 'Wireframing'],
+                    recruiterId: '2',
+                    status: 'approved',
+                    approved: true,
+                    createdAt: new Date('2024-01-10')
+                },
+                {
+                    id: '3',
+                    title: 'Marketing Manager',
+                    company: 'GrowthCo',
+                    location: 'New York',
+                    category: 'marketing',
+                    type: 'full-time',
+                    salary: '$70,000 - $100,000',
+                    description: 'Lead our marketing efforts and drive growth through innovative campaigns and strategies.',
+                    skills: ['Digital Marketing', 'Analytics', 'Campaign Management', 'SEO'],
+                    recruiterId: '2',
+                    status: 'pending',
+                    approved: false,
+                    createdAt: new Date('2024-01-20')
+                }
+            ],
+            applications: [
+                {
+                    id: '1',
+                    candidateId: '1',
+                    jobId: '1',
+                    coverLetter: 'I am very interested in this position...',
+                    resumeUrl: 'demo-resume.pdf',
+                    status: 'applied',
+                    appliedAt: new Date('2024-01-16')
+                }
+            ],
+            savedJobs: ['2']
+        };
+
+        // Current user state
+        let currentUser = null;
+        let isAuthenticated = false;
+
+        // DOM elements
+        const landingPage = document.getElementById('landingPage');
+        const dashboardContent = document.getElementById('dashboardContent');
+        const authModal = document.getElementById('authModal');
+        const jobPostModal = document.getElementById('jobPostModal');
+        const jobApplicationModal = document.getElementById('jobApplicationModal');
+        const userInfo = document.getElementById('userInfo');
+        const authButtons = document.getElementById('authButtons');
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            setupEventListeners();
+            loadFeaturedJobs();
+            updateUI();
+        });
+
+        function setupEventListeners() {
+            // Auth buttons
+            document.getElementById('loginBtn').addEventListener('click', () => showAuthModal('login'));
+            document.getElementById('registerBtn').addEventListener('click', () => showAuthModal('register'));
+            document.getElementById('getStartedBtn').addEventListener('click', () => showAuthModal('register'));
+            document.getElementById('logoutBtn').addEventListener('click', logout);
+
+            // Modal controls
+            document.getElementById('closeAuthModal').addEventListener('click', () => authModal.classList.add('hidden'));
+            document.getElementById('toggleAuth').addEventListener('click', toggleAuthMode);
+            document.getElementById('authForm').addEventListener('submit', handleAuth);
+
+            // Demo login buttons
+            document.getElementById('demoAdmin').addEventListener('click', () => demoLogin('admin@example.com'));
+            document.getElementById('demoRecruiter').addEventListener('click', () => demoLogin('jane@example.com'));
+            document.getElementById('demoCandidate').addEventListener('click', () => demoLogin('john@example.com'));
+
+            // Job posting
+            document.getElementById('postJobBtn').addEventListener('click', () => jobPostModal.classList.remove('hidden'));
+            document.getElementById('closeJobModal').addEventListener('click', () => jobPostModal.classList.add('hidden'));
+            document.getElementById('cancelJobPost').addEventListener('click', () => jobPostModal.classList.add('hidden'));
+            document.getElementById('jobPostForm').addEventListener('submit', handleJobPost);
+
+            // Job application
+            document.getElementById('closeApplicationModal').addEventListener('click', () => jobApplicationModal.classList.add('hidden'));
+            document.getElementById('cancelApplication').addEventListener('click', () => jobApplicationModal.classList.add('hidden'));
+            document.getElementById('jobApplicationForm').addEventListener('submit', handleJobApplication);
+
+            // Search and filters
+            document.getElementById('searchJobs').addEventListener('click', searchJobs);
+            document.getElementById('jobSearch').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') searchJobs();
+            });
+
+            // Tab switching
+            setupTabSwitching();
+        }
+
+        function setupTabSwitching() {
+            // Candidate tabs
+            document.querySelectorAll('.candidate-tab').forEach(tab => {
+                tab.addEventListener('click', (e) => {
+                    const tabName = e.target.dataset.tab;
+                    switchCandidateTab(tabName);
+                });
+            });
+
+            // Recruiter tabs
+            document.querySelectorAll('.recruiter-tab').forEach(tab => {
+                tab.addEventListener('click', (e) => {
+                    const tabName = e.target.dataset.tab;
+                    switchRecruiterTab(tabName);
+                });
+            });
+
+            // Admin tabs
+            document.querySelectorAll('.admin-tab').forEach(tab => {
+                tab.addEventListener('click', (e) => {
+                    const tabName = e.target.dataset.tab;
+                    switchAdminTab(tabName);
+                });
+            });
+        }
+
+        function showAuthModal(mode) {
+            const authTitle = document.getElementById('authTitle');
+            const authSubmit = document.getElementById('authSubmit');
+            const toggleAuth = document.getElementById('toggleAuth');
+            const nameField = document.getElementById('nameField');
+            const roleField = document.getElementById('roleField');
+
+            if (mode === 'login') {
+                authTitle.textContent = 'Login';
+                authSubmit.textContent = 'Login';
+                toggleAuth.textContent = "Don't have an account? Register";
+                nameField.classList.add('hidden');
+                roleField.classList.add('hidden');
+            } else {
+                authTitle.textContent = 'Register';
+                authSubmit.textContent = 'Register';
+                toggleAuth.textContent = 'Already have an account? Login';
+                nameField.classList.remove('hidden');
+                roleField.classList.remove('hidden');
+            }
+
+            authModal.classList.remove('hidden');
+        }
+
+        function toggleAuthMode() {
+            const authTitle = document.getElementById('authTitle');
+            const isLogin = authTitle.textContent === 'Login';
+            showAuthModal(isLogin ? 'register' : 'login');
+        }
+
+        function demoLogin(email) {
+            const user = mockData.users.find(u => u.email === email);
+            if (user) {
+                currentUser = user;
+                isAuthenticated = true;
+                authModal.classList.add('hidden');
+                updateUI();
+                loadDashboard();
+            }
+        }
+
+        function handleAuth(e) {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const isLogin = document.getElementById('authTitle').textContent === 'Login';
+
+            if (isLogin) {
+                // Login logic
+                const user = mockData.users.find(u => u.email === email);
+                if (user) {
+                    currentUser = user;
+                    isAuthenticated = true;
+                    authModal.classList.add('hidden');
+                    updateUI();
+                    loadDashboard();
+                } else {
+                    alert('Invalid credentials');
+                }
+            } else {
+                // Register logic
+                const name = document.getElementById('fullName').value;
+                const role = document.getElementById('role').value;
+                
+                const newUser = {
+                    id: Date.now().toString(),
+                    name,
+                    email,
+                    role
+                };
+                
+                mockData.users.push(newUser);
+                currentUser = newUser;
+                isAuthenticated = true;
+                authModal.classList.add('hidden');
+                updateUI();
+                loadDashboard();
+            }
+        }
+
+        function logout() {
+            currentUser = null;
+            isAuthenticated = false;
+            updateUI();
+        }
+
+        function updateUI() {
+            if (isAuthenticated) {
+                landingPage.classList.add('hidden');
+                dashboardContent.classList.remove('hidden');
+                userInfo.classList.remove('hidden');
+                authButtons.classList.add('hidden');
+                
+                document.getElementById('userName').textContent = currentUser.name;
+                const roleSpan = document.getElementById('userRole');
+                roleSpan.textContent = currentUser.role.charAt(0).toUpperCase() + currentUser.role.slice(1);
+                roleSpan.className = `px-2 py-1 text-xs font-medium rounded-full ${getRoleColor(currentUser.role)}`;
+            } else {
+                landingPage.classList.remove('hidden');
+                dashboardContent.classList.add('hidden');
+                userInfo.classList.add('hidden');
+                authButtons.classList.remove('hidden');
+            }
+        }
+
+        function getRoleColor(role) {
+            switch (role) {
+                case 'admin': return 'bg-red-100 text-red-800';
+                case 'recruiter': return 'bg-blue-100 text-blue-800';
+                case 'candidate': return 'bg-green-100 text-green-800';
+                default: return 'bg-gray-100 text-gray-800';
+            }
+        }
+
+        function loadDashboard() {
+            // Hide all dashboards
+            document.getElementById('candidateDashboard').classList.add('hidden');
+            document.getElementById('recruiterDashboard').classList.add('hidden');
+            document.getElementById('adminDashboard').classList.add('hidden');
+
+            // Show appropriate dashboard
+            switch (currentUser.role) {
+                case 'candidate':
+                    document.getElementById('candidateDashboard').classList.remove('hidden');
+                    loadCandidateDashboard();
+                    break;
+                case 'recruiter':
+                    document.getElementById('recruiterDashboard').classList.remove('hidden');
+                    loadRecruiterDashboard();
+                    break;
+                case 'admin':
+                    document.getElementById('adminDashboard').classList.remove('hidden');
+                    loadAdminDashboard();
+                    break;
+            }
+        }
+
+        function loadFeaturedJobs() {
+            const featuredJobs = document.getElementById('featuredJobs');
+            const approvedJobs = mockData.jobs.filter(job => job.approved).slice(0, 3);
+            
+            featuredJobs.innerHTML = approvedJobs.map(job => `
+                <div class="bg-white rounded-lg shadow-md p-6 card-hover">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900">${job.title}</h3>
+                            <p class="text-gray-600">${job.company}</p>
+                        </div>
+                        <span class="px-2 py-1 bg-indigo-100 text-indigo-800 text-xs font-medium rounded-full">
+                            ${job.type}
+                        </span>
+                    </div>
+                    <div class="flex items-center text-sm text-gray-500 mb-3">
+                        <i data-lucide="map-pin" class="h-4 w-4 mr-1"></i>
+                        ${job.location}
+                    </div>
+                    <p class="text-gray-700 text-sm mb-4 line-clamp-2">${job.description}</p>
+                    <div class="flex justify-between items-center">
+                        <span class="text-indigo-600 font-medium">${job.salary}</span>
+                        <button onclick="showAuthModal('register')" class="text-indigo-600 hover:text-indigo-800 text-sm font-medium">
+                            Apply Now
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+            
+            lucide.createIcons();
+        }
+
+        function loadCandidateDashboard() {
+            loadJobListings();
+            loadMyApplications();
+            loadSavedJobs();
+        }
+
+        function loadJobListings() {
+            const jobListings = document.getElementById('jobListings');
+            const approvedJobs = mockData.jobs.filter(job => job.approved);
+            
+            jobListings.innerHTML = approvedJobs.map(job => {
+                const hasApplied = mockData.applications.some(app => 
+                    app.candidateId === currentUser.id && app.jobId === job.id
+                );
+                const isSaved = mockData.savedJobs.includes(job.id);
+                
+                return `
+                    <div class="bg-white rounded-lg shadow-md p-6 card-hover">
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="flex-1">
+                                <h3 class="text-lg font-semibold text-gray-900 mb-1">${job.title}</h3>
+                                <p class="text-gray-600 mb-2">${job.company}</p>
+                                <div class="flex items-center text-sm text-gray-500 mb-2">
+                                    <i data-lucide="map-pin" class="h-4 w-4 mr-1"></i>
+                                    ${job.location}
+                                    <span class="mx-2">•</span>
+                                    <i data-lucide="clock" class="h-4 w-4 mr-1"></i>
+                                    ${job.type}
+                                </div>
+                                <div class="flex flex-wrap gap-2 mb-3">
+                                    ${job.skills.map(skill => `
+                                        <span class="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-full">${skill}</span>
+                                    `).join('')}
+                                </div>
+                            </div>
+                            <div class="flex flex-col items-end space-y-2">
+                                <button onclick="toggleSaveJob('${job.id}')" class="text-gray-400 hover:text-yellow-500">
+                                    <i data-lucide="${isSaved ? 'bookmark' : 'bookmark'}" class="h-5 w-5 ${isSaved ? 'fill-current text-yellow-500' : ''}"></i>
+                                </button>
+                                <span class="text-indigo-600 font-medium text-sm">${job.salary}</span>
+                            </div>
+                        </div>
+                        <p class="text-gray-700 text-sm mb-4">${job.description.substring(0, 150)}...</p>
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs text-gray-500">Posted ${formatDate(job.createdAt)}</span>
+                            <div class="space-x-2">
+                                <button onclick="viewJobDetails('${job.id}')" class="px-4 py-2 border border-indigo-600 text-indigo-600 rounded-md hover:bg-indigo-50 text-sm">
+                                    View Details
+                                </button>
+                                ${hasApplied ? 
+                                    '<span class="px-4 py-2 bg-green-100 text-green-800 rounded-md text-sm">Applied</span>' :
+                                    `<button onclick="applyToJob('${job.id}')" class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 text-sm">Apply Now</button>`
+                                }
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            lucide.createIcons();
+        }
+
+        function loadMyApplications() {
+            const applicationsList = document.getElementById('applicationsList');
+            const userApplications = mockData.applications.filter(app => app.candidateId === currentUser.id);
+            
+            if (userApplications.length === 0) {
+                applicationsList.innerHTML = `
+                    <div class="text-center py-8">
+                        <i data-lucide="file-text" class="h-12 w-12 text-gray-400 mx-auto mb-4"></i>
+                        <p class="text-gray-500">No applications yet. Start applying to jobs!</p>
+                    </div>
+                `;
+            } else {
+                applicationsList.innerHTML = userApplications.map(app => {
+                    const job = mockData.jobs.find(j => j.id === app.jobId);
+                    return `
+                        <div class="bg-white rounded-lg shadow-md p-6">
+                            <div class="flex justify-between items-start">
+                                <div class="flex-1">
+                                    <h3 class="text-lg font-semibold text-gray-900 mb-1">${job.title}</h3>
+                                    <p class="text-gray-600 mb-2">${job.company}</p>
+                                    <p class="text-sm text-gray-500 mb-3">Applied on ${formatDate(app.appliedAt)}</p>
+                                </div>
+                                <span class="px-3 py-1 rounded-full text-sm font-medium status-${app.status}">
+                                    ${app.status.charAt(0).toUpperCase() + app.status.slice(1)}
+                                </span>
+                            </div>
+                            <div class="mt-4 pt-4 border-t border-gray-200">
+                                <p class="text-sm text-gray-700"><strong>Cover Letter:</strong> ${app.coverLetter}</p>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+            
+            lucide.createIcons();
+        }
+
+        function loadSavedJobs() {
+            const savedJobsList = document.getElementById('savedJobsList');
+            const savedJobs = mockData.jobs.filter(job => mockData.savedJobs.includes(job.id));
+            
+            if (savedJobs.length === 0) {
+                savedJobsList.innerHTML = `
+                    <div class="text-center py-8">
+                        <i data-lucide="bookmark" class="h-12 w-12 text-gray-400 mx-auto mb-4"></i>
+                        <p class="text-gray-500">No saved jobs yet. Save jobs you're interested in!</p>
+                    </div>
+                `;
+            } else {
+                savedJobsList.innerHTML = savedJobs.map(job => `
+                    <div class="bg-white rounded-lg shadow-md p-6 card-hover">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-900">${job.title}</h3>
+                                <p class="text-gray-600">${job.company}</p>
+                                <div class="flex items-center text-sm text-gray-500 mt-2">
+                                    <i data-lucide="map-pin" class="h-4 w-4 mr-1"></i>
+                                    ${job.location}
+                                </div>
+                            </div>
+                            <button onclick="toggleSaveJob('${job.id}')" class="text-yellow-500 hover:text-gray-400">
+                                <i data-lucide="bookmark" class="h-5 w-5 fill-current"></i>
+                            </button>
+                        </div>
+                        <p class="text-gray-700 text-sm mb-4">${job.description.substring(0, 100)}...</p>
+                        <div class="flex justify-between items-center">
+                            <span class="text-indigo-600 font-medium">${job.salary}</span>
+                            <button onclick="applyToJob('${job.id}')" class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 text-sm">
+                                Apply Now
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+            
+            lucide.createIcons();
+        }
+
+        function loadRecruiterDashboard() {
+            updateRecruiterStats();
+            loadRecruiterJobs();
+            loadRecruiterApplications();
+        }
+
+        function updateRecruiterStats() {
+            const recruiterJobs = mockData.jobs.filter(job => job.recruiterId === currentUser.id);
+            const activeJobs = recruiterJobs.filter(job => job.approved).length;
+            const totalApplications = mockData.applications.filter(app => 
+                recruiterJobs.some(job => job.id === app.jobId)
+            ).length;
+            const pendingReview = mockData.applications.filter(app => 
+                recruiterJobs.some(job => job.id === app.jobId) && app.status === 'applied'
+            ).length;
+            const shortlisted = mockData.applications.filter(app => 
+                recruiterJobs.some(job => job.id === app.jobId) && app.status === 'shortlisted'
+            ).length;
+
+            document.getElementById('activeJobsCount').textContent = activeJobs;
+            document.getElementById('totalApplicationsCount').textContent = totalApplications;
+            document.getElementById('pendingReviewCount').textContent = pendingReview;
+            document.getElementById('shortlistedCount').textContent = shortlisted;
+        }
+
+        function loadRecruiterJobs() {
+            const recruiterJobsList = document.getElementById('recruiterJobsList');
+            const recruiterJobs = mockData.jobs.filter(job => job.recruiterId === currentUser.id);
+            
+            if (recruiterJobs.length === 0) {
+                recruiterJobsList.innerHTML = `
+                    <div class="text-center py-8">
+                        <i data-lucide="briefcase" class="h-12 w-12 text-gray-400 mx-auto mb-4"></i>
+                        <p class="text-gray-500">No job posts yet. Create your first job posting!</p>
+                    </div>
+                `;
+            } else {
+                recruiterJobsList.innerHTML = recruiterJobs.map(job => {
+                    const applicationsCount = mockData.applications.filter(app => app.jobId === job.id).length;
+                    return `
+                        <div class="bg-white rounded-lg shadow-md p-6">
+                            <div class="flex justify-between items-start mb-4">
+                                <div class="flex-1">
+                                    <h3 class="text-lg font-semibold text-gray-900 mb-1">${job.title}</h3>
+                                    <p class="text-gray-600 mb-2">${job.company}</p>
+                                    <div class="flex items-center text-sm text-gray-500">
+                                        <i data-lucide="map-pin" class="h-4 w-4 mr-1"></i>
+                                        ${job.location}
+                                        <span class="mx-2">•</span>
+                                        <i data-lucide="users" class="h-4 w-4 mr-1"></i>
+                                        ${applicationsCount} applications
+                                    </div>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <span class="px-3 py-1 rounded-full text-sm font-medium status-${job.status}">
+                                        ${job.approved ? 'Approved' : 'Pending'}
+                                    </span>
+                                    <div class="flex space-x-1">
+                                        <button onclick="editJob('${job.id}')" class="p-2 text-gray-400 hover:text-indigo-600">
+                                            <i data-lucide="edit" class="h-4 w-4"></i>
+                                        </button>
+                                        <button onclick="deleteJob('${job.id}')" class="p-2 text-gray-400 hover:text-red-600">
+                                            <i data-lucide="trash-2" class="h-4 w-4"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <p class="text-gray-700 text-sm mb-4">${job.description.substring(0, 150)}...</p>
+                            <div class="flex justify-between items-center">
+                                <span class="text-xs text-gray-500">Posted ${formatDate(job.createdAt)}</span>
+                                <button onclick="viewJobApplications('${job.id}')" class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 text-sm">
+                                    View Applications (${applicationsCount})
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+            
+            lucide.createIcons();
+        }
+
+        function loadRecruiterApplications() {
+            const recruiterApplicationsList = document.getElementById('recruiterApplicationsList');
+            const recruiterJobs = mockData.jobs.filter(job => job.recruiterId === currentUser.id);
+            const applications = mockData.applications.filter(app => 
+                recruiterJobs.some(job => job.id === app.jobId)
+            );
+            
+            if (applications.length === 0) {
+                recruiterApplicationsList.innerHTML = `
+                    <div class="text-center py-8">
+                        <i data-lucide="file-text" class="h-12 w-12 text-gray-400 mx-auto mb-4"></i>
+                        <p class="text-gray-500">No applications received yet.</p>
+                    </div>
+                `;
+            } else {
+                recruiterApplicationsList.innerHTML = applications.map(app => {
+                    const job = mockData.jobs.find(j => j.id === app.jobId);
+                    const candidate = mockData.users.find(u => u.id === app.candidateId);
+                    return `
+                        <div class="bg-white rounded-lg shadow-md p-6">
+                            <div class="flex justify-between items-start mb-4">
+                                <div class="flex-1">
+                                    <h3 class="text-lg font-semibold text-gray-900 mb-1">${candidate.name}</h3>
+                                    <p class="text-gray-600 mb-1">Applied for: ${job.title}</p>
+                                    <p class="text-sm text-gray-500">Applied on ${formatDate(app.appliedAt)}</p>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <span class="px-3 py-1 rounded-full text-sm font-medium status-${app.status}">
+                                        ${app.status.charAt(0).toUpperCase() + app.status.slice(1)}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="mb-4">
+                                <p class="text-sm text-gray-700 mb-2"><strong>Cover Letter:</strong></p>
+                                <p class="text-sm text-gray-600">${app.coverLetter}</p>
+                            </div>
+                            <div class="flex justify-between items-center pt-4 border-t border-gray-200">
+                                <div class="flex space-x-2">
+                                    <button onclick="downloadResume('${app.resumeUrl}')" class="px-3 py-1 border border-gray-300 text-gray-700 rounded text-sm hover:bg-gray-50">
+                                        <i data-lucide="download" class="h-4 w-4 inline mr-1"></i>
+                                        Resume (Demo)
+                                    </button>
+                                    <button onclick="contactCandidate('${candidate.email}')" class="px-3 py-1 border border-gray-300 text-gray-700 rounded text-sm hover:bg-gray-50">
+                                        <i data-lucide="mail" class="h-4 w-4 inline mr-1"></i>
+                                        Contact
+                                    </button>
+                                </div>
+                                <div class="flex space-x-2">
+                                    <button onclick="updateApplicationStatus('${app.id}', 'shortlisted')" class="px-3 py-1 bg-yellow-600 text-white rounded text-sm hover:bg-yellow-700">
+                                        Shortlist
+                                    </button>
+                                    <button onclick="updateApplicationStatus('${app.id}', 'rejected')" class="px-3 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700">
+                                        Reject
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+            
+            lucide.createIcons();
+        }
+
+        function loadAdminDashboard() {
+            updateAdminStats();
+            loadUsersList();
+            loadPendingJobs();
+            loadPlatformStats();
+        }
+
+        function updateAdminStats() {
+            document.getElementById('totalUsersCount').textContent = mockData.users.length;
+            document.getElementById('adminTotalJobsCount').textContent = mockData.jobs.length;
+            document.getElementById('pendingApprovalCount').textContent = mockData.jobs.filter(job => !job.approved).length;
+            document.getElementById('adminTotalApplicationsCount').textContent = mockData.applications.length;
+        }
+
+        function loadUsersList() {
+            const usersList = document.getElementById('usersList');
+            
+            usersList.innerHTML = mockData.users.map(user => `
+                <div class="px-6 py-4 flex justify-between items-center">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0 h-10 w-10">
+                            <div class="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center">
+                                <span class="text-indigo-600 font-medium">${user.name.charAt(0)}</span>
+                            </div>
+                        </div>
+                        <div class="ml-4">
+                            <div class="text-sm font-medium text-gray-900">${user.name}</div>
+                            <div class="text-sm text-gray-500">${user.email}</div>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <span class="px-2 py-1 text-xs font-medium rounded-full ${getRoleColor(user.role)}">
+                            ${user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+                        </span>
+                        <select onchange="changeUserRole('${user.id}', this.value)" class="text-sm border border-gray-300 rounded px-2 py-1">
+                            <option value="candidate" ${user.role === 'candidate' ? 'selected' : ''}>Candidate</option>
+                            <option value="recruiter" ${user.role === 'recruiter' ? 'selected' : ''}>Recruiter</option>
+                            <option value="admin" ${user.role === 'admin' ? 'selected' : ''}>Admin</option>
+                        </select>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function loadPendingJobs() {
+            const pendingJobsList = document.getElementById('pendingJobsList');
+            const pendingJobs = mockData.jobs.filter(job => !job.approved);
+            
+            if (pendingJobs.length === 0) {
+                pendingJobsList.innerHTML = `
+                    <div class="px-6 py-8 text-center">
+                        <i data-lucide="check-circle" class="h-12 w-12 text-gray-400 mx-auto mb-4"></i>
+                        <p class="text-gray-500">No jobs pending approval.</p>
+                    </div>
+                `;
+            } else {
+                pendingJobsList.innerHTML = pendingJobs.map(job => {
+                    const recruiter = mockData.users.find(u => u.id === job.recruiterId);
+                    return `
+                        <div class="px-6 py-4">
+                            <div class="flex justify-between items-start mb-3">
+                                <div class="flex-1">
+                                    <h3 class="text-lg font-semibold text-gray-900 mb-1">${job.title}</h3>
+                                    <p class="text-gray-600 mb-1">${job.company}</p>
+                                    <p class="text-sm text-gray-500">Posted by: ${recruiter.name} (${recruiter.email})</p>
+                                </div>
+                                <span class="text-xs text-gray-500">Posted ${formatDate(job.createdAt)}</span>
+                            </div>
+                            <p class="text-gray-700 text-sm mb-4">${job.description.substring(0, 200)}...</p>
+                            <div class="flex justify-end space-x-2">
+                                <button onclick="approveJob('${job.id}')" class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 text-sm">
+                                    Approve
+                                </button>
+                                <button onclick="rejectJob('${job.id}')" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 text-sm">
+                                    Reject
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+            
+            lucide.createIcons();
+        }
+
+        function loadPlatformStats() {
+            const candidates = mockData.users.filter(u => u.role === 'candidate').length;
+            const recruiters = mockData.users.filter(u => u.role === 'recruiter').length;
+            const admins = mockData.users.filter(u => u.role === 'admin').length;
+            const activeJobs = mockData.jobs.filter(j => j.approved).length;
+            const pendingJobs = mockData.jobs.filter(j => !j.approved).length;
+
+            document.getElementById('candidatesCount').textContent = candidates;
+            document.getElementById('recruitersCount').textContent = recruiters;
+            document.getElementById('adminsCount').textContent = admins;
+            document.getElementById('statsActiveJobs').textContent = activeJobs;
+            document.getElementById('statsPendingJobs').textContent = pendingJobs;
+            document.getElementById('statsApplications').textContent = mockData.applications.length;
+        }
+
+        // Tab switching functions
+        function switchCandidateTab(tabName) {
+            document.querySelectorAll('.candidate-tab').forEach(tab => {
+                tab.classList.remove('active', 'border-indigo-500', 'text-indigo-600');
+                tab.classList.add('border-transparent', 'text-gray-500');
+            });
+            document.querySelectorAll('.candidate-tab-content').forEach(content => {
+                content.classList.add('hidden');
+            });
+
+            document.querySelector(`[data-tab="${tabName}"]`).classList.add('active', 'border-indigo-500', 'text-indigo-600');
+            document.querySelector(`[data-tab="${tabName}"]`).classList.remove('border-transparent', 'text-gray-500');
+            document.getElementById(tabName).classList.remove('hidden');
+        }
+
+        function switchRecruiterTab(tabName) {
+            document.querySelectorAll('.recruiter-tab').forEach(tab => {
+                tab.classList.remove('active', 'border-indigo-500', 'text-indigo-600');
+                tab.classList.add('border-transparent', 'text-gray-500');
+            });
+            document.querySelectorAll('.recruiter-tab-content').forEach(content => {
+                content.classList.add('hidden');
+            });
+
+            document.querySelector(`[data-tab="${tabName}"]`).classList.add('active', 'border-indigo-500', 'text-indigo-600');
+            document.querySelector(`[data-tab="${tabName}"]`).classList.remove('border-transparent', 'text-gray-500');
+            document.getElementById(tabName).classList.remove('hidden');
+        }
+
+        function switchAdminTab(tabName) {
+            document.querySelectorAll('.admin-tab').forEach(tab => {
+                tab.classList.remove('active', 'border-indigo-500', 'text-indigo-600');
+                tab.classList.add('border-transparent', 'text-gray-500');
+            });
+            document.querySelectorAll('.admin-tab-content').forEach(content => {
+                content.classList.add('hidden');
+            });
+
+            document.querySelector(`[data-tab="${tabName}"]`).classList.add('active', 'border-indigo-500', 'text-indigo-600');
+            document.querySelector(`[data-tab="${tabName}"]`).classList.remove('border-transparent', 'text-gray-500');
+            document.getElementById(tabName).classList.remove('hidden');
+        }
+
+        // Job-related functions
+        function handleJobPost(e) {
+            e.preventDefault();
+            
+            const newJob = {
+                id: Date.now().toString(),
+                title: document.getElementById('jobTitle').value,
+                company: document.getElementById('jobCompany').value,
+                location: document.getElementById('jobLocation').value,
+                category: document.getElementById('jobCategory').value,
+                type: document.getElementById('jobType').value,
+                salary: document.getElementById('jobSalary').value,
+                description: document.getElementById('jobDescription').value,
+                skills: document.getElementById('jobSkills').value.split(',').map(s => s.trim()),
+                recruiterId: currentUser.id,
+                status: 'pending',
+                approved: false,
+                createdAt: new Date()
+            };
+            
+            mockData.jobs.push(newJob);
+            jobPostModal.classList.add('hidden');
+            document.getElementById('jobPostForm').reset();
+            
+            if (currentUser.role === 'recruiter') {
+                loadRecruiterDashboard();
+            }
+            
+            alert('Job posted successfully! It will be reviewed by an admin.');
+        }
+
+        function applyToJob(jobId) {
+            window.currentJobId = jobId;
+            jobApplicationModal.classList.remove('hidden');
+        }
+
+        function handleJobApplication(e) {
+            e.preventDefault();
+            
+            const application = {
+                id: Date.now().toString(),
+                candidateId: currentUser.id,
+                jobId: window.currentJobId,
+                coverLetter: document.getElementById('coverLetter').value,
+                resumeUrl: 'demo-resume.pdf',
+                status: 'applied',
+                appliedAt: new Date()
+            };
+            
+            mockData.applications.push(application);
+            jobApplicationModal.classList.add('hidden');
+            document.getElementById('jobApplicationForm').reset();
+            
+            loadCandidateDashboard();
+            alert('Application submitted successfully!');
+        }
+
+        function toggleSaveJob(jobId) {
+            const index = mockData.savedJobs.indexOf(jobId);
+            if (index > -1) {
+                mockData.savedJobs.splice(index, 1);
+            } else {
+                mockData.savedJobs.push(jobId);
+            }
+            loadCandidateDashboard();
+        }
+
+        function searchJobs() {
+            const searchTerm = document.getElementById('jobSearch').value.toLowerCase();
+            const location = document.getElementById('locationFilter').value;
+            const category = document.getElementById('categoryFilter').value;
+            
+            let filteredJobs = mockData.jobs.filter(job => job.approved);
+            
+            if (searchTerm) {
+                filteredJobs = filteredJobs.filter(job => 
+                    job.title.toLowerCase().includes(searchTerm) ||
+                    job.company.toLowerCase().includes(searchTerm) ||
+                    job.description.toLowerCase().includes(searchTerm)
+                );
+            }
+            
+            if (location) {
+                filteredJobs = filteredJobs.filter(job => 
+                    job.location.toLowerCase().includes(location.toLowerCase())
+                );
+            }
+            
+            if (category) {
+                filteredJobs = filteredJobs.filter(job => job.category === category);
+            }
+            
+            // Update job listings with filtered results
+            const jobListings = document.getElementById('jobListings');
+            jobListings.innerHTML = filteredJobs.map(job => {
+                const hasApplied = mockData.applications.some(app => 
+                    app.candidateId === currentUser.id && app.jobId === job.id
+                );
+                const isSaved = mockData.savedJobs.includes(job.id);
+                
+                return `
+                    <div class="bg-white rounded-lg shadow-md p-6 card-hover">
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="flex-1">
+                                <h3 class="text-lg font-semibold text-gray-900 mb-1">${job.title}</h3>
+                                <p class="text-gray-600 mb-2">${job.company}</p>
+                                <div class="flex items-center text-sm text-gray-500 mb-2">
+                                    <i data-lucide="map-pin" class="h-4 w-4 mr-1"></i>
+                                    ${job.location}
+                                    <span class="mx-2">•</span>
+                                    <i data-lucide="clock" class="h-4 w-4 mr-1"></i>
+                                    ${job.type}
+                                </div>
+                                <div class="flex flex-wrap gap-2 mb-3">
+                                    ${job.skills.map(skill => `
+                                        <span class="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-full">${skill}</span>
+                                    `).join('')}
+                                </div>
+                            </div>
+                            <div class="flex flex-col items-end space-y-2">
+                                <button onclick="toggleSaveJob('${job.id}')" class="text-gray-400 hover:text-yellow-500">
+                                    <i data-lucide="bookmark" class="h-5 w-5 ${isSaved ? 'fill-current text-yellow-500' : ''}"></i>
+                                </button>
+                                <span class="text-indigo-600 font-medium text-sm">${job.salary}</span>
+                            </div>
+                        </div>
+                        <p class="text-gray-700 text-sm mb-4">${job.description.substring(0, 150)}...</p>
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs text-gray-500">Posted ${formatDate(job.createdAt)}</span>
+                            <div class="space-x-2">
+                                <button onclick="viewJobDetails('${job.id}')" class="px-4 py-2 border border-indigo-600 text-indigo-600 rounded-md hover:bg-indigo-50 text-sm">
+                                    View Details
+                                </button>
+                                ${hasApplied ? 
+                                    '<span class="px-4 py-2 bg-green-100 text-green-800 rounded-md text-sm">Applied</span>' :
+                                    `<button onclick="applyToJob('${job.id}')" class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 text-sm">Apply Now</button>`
+                                }
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            lucide.createIcons();
+        }
+
+        // Admin functions
+        function changeUserRole(userId, newRole) {
+            const user = mockData.users.find(u => u.id === userId);
+            if (user) {
+                user.role = newRole;
+                loadAdminDashboard();
+                alert(`User role updated to ${newRole}`);
+            }
+        }
+
+        function approveJob(jobId) {
+            const job = mockData.jobs.find(j => j.id === jobId);
+            if (job) {
+                job.approved = true;
+                job.status = 'approved';
+                loadAdminDashboard();
+                alert('Job approved successfully!');
+            }
+        }
+
+        function rejectJob(jobId) {
+            const jobIndex = mockData.jobs.findIndex(j => j.id === jobId);
+            if (jobIndex > -1) {
+                mockData.jobs.splice(jobIndex, 1);
+                loadAdminDashboard();
+                alert('Job rejected and removed.');
+            }
+        }
+
+        // Recruiter functions
+        function updateApplicationStatus(applicationId, status) {
+            const application = mockData.applications.find(app => app.id === applicationId);
+            if (application) {
+                application.status = status;
+                loadRecruiterDashboard();
+                alert(`Application ${status} successfully!`);
+            }
+        }
+
+        function downloadResume(resumeUrl) {
+            alert('Demo: Resume download would start here. File: ' + resumeUrl);
+        }
+
+        function contactCandidate(email) {
+            alert('Demo: Email client would open to contact: ' + email);
+        }
+
+        function editJob(jobId) {
+            alert('Demo: Job editing modal would open for job ID: ' + jobId);
+        }
+
+        function deleteJob(jobId) {
+            if (confirm('Are you sure you want to delete this job?')) {
+                const jobIndex = mockData.jobs.findIndex(j => j.id === jobId);
+                if (jobIndex > -1) {
+                    mockData.jobs.splice(jobIndex, 1);
+                    loadRecruiterDashboard();
+                    alert('Job deleted successfully!');
+                }
+            }
+        }
+
+        function viewJobDetails(jobId) {
+            const job = mockData.jobs.find(j => j.id === jobId);
+            if (job) {
+                alert(`Job Details:\n\nTitle: ${job.title}\nCompany: ${job.company}\nLocation: ${job.location}\nSalary: ${job.salary}\n\nDescription:\n${job.description}`);
+            }
+        }
+
+        function viewJobApplications(jobId) {
+            switchRecruiterTab('applications');
+        }
+
+        // Utility functions
+        function formatDate(date) {
+            return new Date(date).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
+        }
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'964541ec65fb7a2e',t:'MTc1MzM3OTQwMi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
